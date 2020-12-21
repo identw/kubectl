@@ -1,0 +1,26 @@
+name: Push latest version
+on:
+  push:
+    branches:
+      - master
+jobs:
+  docker-build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Publish latest tag to registry
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE: ${{ github.repository }}
+          GITHUB_USER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+        run: |
+          docker version
+          docker build -t docker.io/${IMAGE}:latest .
+          docker tag docker.io/${IMAGE}:latest ghcr.io/${IMAGE}:latest
+          docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+          docker push docker.io/${IMAGE}:latest
+          docker login -u "${GITHUB_USER}" -p "${GITHUB_TOKEN}" ghcr.io
+          docker push ghcr.io/${IMAGE}:latest
+

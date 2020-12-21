@@ -1,0 +1,28 @@
+name: Push tag version
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+jobs:
+  docker-build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Set env
+        run: |
+          echo "RELEASE_VERSION=$(echo ${GITHUB_REF:10})" >> $GITHUB_ENV
+      - name: Publish latest tag to registry
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE: ${{ github.repository }}
+          GITHUB_USER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+        run: |
+          docker version
+          docker build -t docker.io/${IMAGE}:${RELEASE_VERSION} .
+          docker tag docker.io/${IMAGE}:${RELEASE_VERSION} ghcr.io/${IMAGE}:${RELEASE_VERSION}
+          docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+          docker push docker.io/${IMAGE}:${RELEASE_VERSION}
+          docker login -u "${GITHUB_USER}" -p "${GITHUB_TOKEN}" ghcr.io
+          docker push ghcr.io/${IMAGE}:${RELEASE_VERSION}
