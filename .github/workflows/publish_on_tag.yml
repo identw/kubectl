@@ -3,6 +3,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
+      - 'v*.*'
 jobs:
   docker-build-and-publish:
     runs-on: ubuntu-latest
