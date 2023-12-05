@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+permissions:
+  checks: write
+  contents: read
+  packages: write
 jobs:
   docker-build-and-publish:
     runs-on: ubuntu-latest
@@ -14,7 +18,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           IMAGE: ${{ github.repository }}
           GITHUB_USER: ${{ github.repository_owner }}
-          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           docker version
           docker build -t docker.io/${IMAGE}:latest .
