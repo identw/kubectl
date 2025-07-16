@@ -14,14 +14,14 @@ jobs:
 
     steps:
       - name: Check if PR is from renovate and touches Dockerfile
-        if: contains(github.event.pull_request.head.ref, 'renovate') && github.event.pull_request.changed_files > 0
+        # if: contains(github.event.pull_request.head.ref, 'renovate') && github.event.pull_request.changed_files > 0
         uses: actions/checkout@main
 
       - name: Extract kubectl version from PR diff
         id: parse
         run: |
           echo '${{ toJSON(github.event.pull_request) }}' | jq 
-          
+
           # VERSION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
           #   "${{ github.event.pull_request.diff_url }}" \
           #   | grep -Eo 'https://dl.k8s.io/release/v[0-9]+\.[0-9]+\.[0-9]+' \
