@@ -11,7 +11,8 @@
           "versioningTemplate": "semver"
         }
     ],
-    "recreateWhen": "always",
     "automerge": true,
-    "prHourlyLimit": 1000
+    "automergeStrategy": "merge-commit",
+    "automergeType": "pr",
+    "platformAutomerge": false
 }
