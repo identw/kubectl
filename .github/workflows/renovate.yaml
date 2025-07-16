@@ -8,14 +8,13 @@ on:
   schedule:
     - cron: '0 3 * * 1'
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  statuses: write
-
 jobs:
   renovate:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      statuses: write
     runs-on: ubuntu-latest
 
     steps:
@@ -27,5 +26,5 @@ jobs:
         with:
           configurationFile: .github/renovate_config.js
           token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          LOG_LEVEL: debug
+        # env:
+        #   LOG_LEVEL: debug
