@@ -22,17 +22,3 @@ jobs:
         run: |
           echo '${{ toJSON(github.event.pull_request) }}'
 
-          # VERSION=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          #   "${{ github.event.pull_request.diff_url }}" \
-          #   | grep -Eo 'https://dl.k8s.io/release/v[0-9]+\.[0-9]+\.[0-9]+' \
-          #   | head -1 | sed 's|.*/v||')
-
-          # echo "Extracted kubectl version: $VERSION"
-          # echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      # - name: Create tag
-      #   if: steps.parse.outputs.version != ''
-      #   run: |
-      #     git fetch --unshallow
-      #     git tag "kubectl-v${{ steps.parse.outputs.version }}"
-      #     git push origin "kubectl-v${{ steps.parse.outputs.version }}"
