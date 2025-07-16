@@ -1,4 +1,8 @@
 name: Renovate
+concurrency:
+  group: 'renovate'
+  cancel-in-progress: true
+
 
 on:
   workflow_dispatch:
