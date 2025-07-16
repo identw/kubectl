@@ -1,0 +1,16 @@
+{
+    "enabledManagers": ["dockerfile", "custom.regex"],
+    "customManagers": [
+        {
+          "fileMatch": ["Dockerfile"],
+          "matchStrings": [
+            "https://dl\\.k8s\\.io/release/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/bin/linux/amd64/kubectl"
+          ],
+          "datasourceTemplate": "github-releases",
+          "depNameTemplate": "kubernetes/kubernetes",
+          "versioningTemplate": "semver"
+        }
+    ],
+    "recreateWhen": "always",
+    "prHourlyLimit": 1000
+}

@@ -1,0 +1,32 @@
+name: Tag kubectl version
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  tag-kubectl:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check if PR is from renovate and touches Dockerfile
+        if: contains(github.event.pull_request.head.ref, 'renovate') && github.event.pull_request.changed_files > 0
+        uses: actions/checkout@main
+
+      - name: Extract kubectl version from PR diff
+        id: version
+        run: |
+          set -x
+          VERSION=`echo '${{ github.event.pull_request.title }}' | sed 's/Update dependency kubernetes\/kubernetes to \(v[0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/g'`
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        if: steps.version.outputs.version != ''
+        run: |
+            git fetch --unshallow
+            git tag ${{ steps.version.outputs.version }}
+            git push origin ${{ steps.version.outputs.version }}

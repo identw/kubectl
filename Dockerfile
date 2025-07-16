@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.21.3
+FROM docker.io/alpine:3.22.1
 LABEL org.opencontainers.image.source https://github.com/identw/kubectl
 
 RUN apk add --no-cache curl \
