@@ -27,5 +27,5 @@ jobs:
         if: steps.version.outputs.version != ''
         run: |
             git fetch --unshallow
-            git tag "v${{ steps.version.outputs.version }}"
-            git push origin "v${{ steps.version.outputs.version }}"
+            git tag ${{ steps.version.outputs.version }}
+            git push origin ${{ steps.version.outputs.version }}
