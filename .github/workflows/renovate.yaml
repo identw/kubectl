@@ -43,4 +43,4 @@ jobs:
           gh pr create --title "Auto PR from GitHub Action" \
                        --body "This PR was created automatically." \
                        --head my-auto-branch \
-                       --base main
+                       --base master
