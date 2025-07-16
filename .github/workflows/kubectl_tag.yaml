@@ -20,7 +20,8 @@ jobs:
       - name: Extract kubectl version from PR diff
         id: version
         run: |
-          VERSION=`echo '${{ toJSON(github.event.pull_request.title) }}' | sed 's/Update dependency kubernetes\/kubernetes to \(v[0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/'`
+          set -x
+          VERSION=`echo '${{ github.event.pull_request.title }}' | sed 's/Update dependency kubernetes\/kubernetes to \(v[0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/g'`
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create tag
