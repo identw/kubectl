@@ -1,0 +1,13 @@
+{
+    "extends": ["config:base"],
+    "docker": {
+      "enabled": true
+    },
+    "packageRules": [
+      {
+        "matchDatasources": ["docker"],
+        "groupName": "Base Docker images"
+      }
+    ]
+  }
+  
