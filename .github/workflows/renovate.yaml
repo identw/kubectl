@@ -29,18 +29,3 @@ jobs:
         env:
           LOG_LEVEL: debug
 
-      - name: Authenticate gh CLI
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh auth setup-git
-          gh auth status
-
-      - name: Create Pull Request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create --title "Auto PR from GitHub Action" \
-                       --body "This PR was created automatically." \
-                       --head my-auto-branch \
-                       --base master
