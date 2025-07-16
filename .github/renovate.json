@@ -11,5 +11,6 @@
           "versioningTemplate": "semver"
         }
     ],
-    "recreateWhen": "always"
+    "recreateWhen": "always",
+    "prHourlyLimit": 1000
 }
