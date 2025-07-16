@@ -12,5 +12,6 @@
         }
     ],
     "recreateWhen": "always",
+    "automerge": true,
     "prHourlyLimit": 1000
 }
