@@ -19,8 +19,6 @@ jobs:
 
       - name: Extract kubectl version from PR diff
         id: parse
-        env:
-
         run: |
           echo '${{ toJSON(github.event.pull_request) }}'
 
