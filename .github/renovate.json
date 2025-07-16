@@ -10,5 +10,6 @@
           "depNameTemplate": "kubernetes/kubernetes",
           "versioningTemplate": "semver"
         }
-    ]
+    ],
+    "recreateWhen": "always"
 }
