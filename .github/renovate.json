@@ -1,5 +1,5 @@
 {
-    "enabledManagers": ["dockerfile"],
+    "enabledManagers": ["dockerfile", "custom.regex"],
     "customManagers": [
         {
           "fileMatch": ["Dockerfile"],
