@@ -29,3 +29,13 @@ jobs:
         env:
           LOG_LEVEL: debug
 
+  # GITHUB_TOKEN merges/PRs do not trigger other workflows — automerge here.
+  automerge:
+    needs: renovate
+    permissions:
+      contents: write
+      pull-requests: write
+      packages: write
+      checks: write
+    uses: ./.github/workflows/automerge_renovate.yml
+    secrets: inherit

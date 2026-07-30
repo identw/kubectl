@@ -1,18 +1,27 @@
 {
-    "enabledManagers": ["dockerfile", "custom.regex"],
-    "customManagers": [
-        {
-          "fileMatch": ["Dockerfile"],
-          "matchStrings": [
-            "https://dl\\.k8s\\.io/release/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/bin/linux/amd64/kubectl"
-          ],
-          "datasourceTemplate": "github-releases",
-          "depNameTemplate": "kubernetes/kubernetes",
-          "versioningTemplate": "semver"
-        }
-    ],
-    "automerge": true,
-    "automergeStrategy": "merge-commit",
-    "automergeType": "pr",
-    "platformAutomerge": false
+  "enabledManagers": ["dockerfile", "custom.regex"],
+  "dockerfile": {
+    "fileMatch": ["^Dockerfile_v\\d+\\.\\d+\\.x$"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^Dockerfile_v\\d+\\.\\d+\\.x$"],
+      "matchStrings": [
+        "https://dl\\.k8s\\.io/release/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/bin/linux/amd64/kubectl"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes/kubernetes",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Group alpine base image updates across all Dockerfiles",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["docker.io/alpine", "alpine"],
+      "groupName": "alpine base image"
+    }
+  ],
+  "automerge": false
 }

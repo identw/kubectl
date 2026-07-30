@@ -1,0 +1,88 @@
+name: Automerge renovate version PRs
+
+# Primary path for GITHUB_TOKEN: also invoked from renovate.yaml / detect_new_kubectl_minor
+# after bot PRs are created, because those events do not trigger other workflows.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+  checks: write
+
+jobs:
+  automerge:
+    if: >
+      github.event_name != 'pull_request' || (
+        github.event.pull_request.user.login == 'github-actions[bot]' &&
+        github.event.pull_request.draft == false &&
+        (
+          startsWith(github.event.pull_request.head.ref, 'renovate/') ||
+          startsWith(github.event.pull_request.head.ref, 'chore/new-kubectl-minor-')
+        )
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Automerge eligible PRs
+        id: merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          chmod +x .github/scripts/automerge_renovate_prs.sh
+          .github/scripts/automerge_renovate_prs.sh | tee /tmp/automerge.log
+          grep '^MERGED ' /tmp/automerge.log > /tmp/merged.txt || true
+          if [ -s /tmp/merged.txt ]; then
+            echo "has_merges=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_merges=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tag, release, publish images, update README
+        if: steps.merge.outputs.has_merges == 'true'
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE: ${{ github.repository }}
+          REPO: ${{ github.repository }}
+          GITHUB_USER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          chmod +x .github/scripts/*.sh .github/scripts/update_readme.py
+          git pull --ff-only origin main
+
+          publish_latest=false
+
+          while read -r _ pr rest; do
+            kubectl="$(echo "${rest}" | sed -n 's/.*kubectl=\([^ ]*\).*/\1/p')"
+            alpine="$(echo "${rest}" | sed -n 's/.*alpine=\([^ ]*\).*/\1/p')"
+
+            if [ "${alpine}" = "yes" ]; then
+              publish_latest=true
+            fi
+
+            if [ "${kubectl}" != "none" ] && [ -n "${kubectl}" ]; then
+              IFS=',' read -ra versions <<< "${kubectl}"
+              for version in "${versions[@]}"; do
+                .github/scripts/publish_kubectl_version.sh "${version}"
+              done
+              publish_latest=true
+            fi
+          done < /tmp/merged.txt
+
+          if [ "${publish_latest}" = "true" ]; then
+            dockerfile="$(ls -1 Dockerfile_v*.x | sed 's/^Dockerfile_v//' | sort -t. -k1,1n -k2,2n | tail -1 | sed 's/^/Dockerfile_v/')"
+            .github/scripts/docker_publish.sh "${dockerfile}" "latest"
+          fi

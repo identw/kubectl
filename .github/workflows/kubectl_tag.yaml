@@ -6,27 +6,72 @@ on:
 
 jobs:
   tag-kubectl:
+    # Covers human merges of renovate PRs and new-minor PRs.
+    # Bot automerge path is handled in automerge_renovate.yml.
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
+      packages: write
+      checks: write
 
     steps:
-      - name: Check if PR is from renovate and touches Dockerfile
-        if: contains(github.event.pull_request.head.ref, 'renovate') && github.event.pull_request.changed_files > 0
-        uses: actions/checkout@main
+      - uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          ref: main
 
-      - name: Extract kubectl version from PR diff
-        id: version
+      - name: Create tags/releases for new kubectl versions in PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          IMAGE: ${{ github.repository }}
+          GITHUB_USER: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -x
-          VERSION=`echo '${{ github.event.pull_request.title }}' | sed 's/Update dependency kubernetes\/kubernetes to \(v[0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/g'`
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          chmod +x .github/scripts/*.sh .github/scripts/update_readme.py
 
-      - name: Create tag
-        if: steps.version.outputs.version != ''
-        run: |
-            git fetch --unshallow
-            git tag ${{ steps.version.outputs.version }}
-            git push origin ${{ steps.version.outputs.version }}
+          files_json="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate)"
+
+          VERSIONS="$(python3 - "$files_json" <<'PY'
+          import json, re, sys
+
+          KUBECTL_PLUS = re.compile(
+              r'^\+.*https://dl\.k8s\.io/release/(v\d+\.\d+\.\d+)/bin/linux/amd64/kubectl'
+          )
+          DOCKERFILE_RE = re.compile(r'^Dockerfile_v\d+\.\d+\.x$')
+
+          files = json.loads(sys.argv[1])
+          versions = []
+          for f in files:
+              name = f.get('filename', '')
+              if not DOCKERFILE_RE.match(name):
+                  continue
+              patch = f.get('patch') or ''
+              for line in patch.splitlines():
+                  m = KUBECTL_PLUS.match(line)
+                  if m:
+                      versions.append(m.group(1))
+
+          for v in sorted(set(versions), key=lambda s: list(map(int, s[1:].split('.')))):
+              print(v)
+          PY
+          )"
+
+          if [ -z "${VERSIONS}" ]; then
+            echo "No kubectl version additions in Dockerfile_v*.x; skipping tag/release"
+            exit 0
+          fi
+
+          while IFS= read -r VERSION; do
+            [ -n "${VERSION}" ] || continue
+            .github/scripts/publish_kubectl_version.sh "${VERSION}"
+          done <<< "${VERSIONS}"
+
+          dockerfile="$(ls -1 Dockerfile_v*.x | sed 's/^Dockerfile_v//' | sort -t. -k1,1n -k2,2n | tail -1 | sed 's/^/Dockerfile_v/')"
+          .github/scripts/docker_publish.sh "${dockerfile}" "latest"
