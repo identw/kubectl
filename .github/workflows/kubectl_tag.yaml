@@ -34,44 +34,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          chmod +x .github/scripts/*.sh .github/scripts/update_readme.py
-
-          files_json="$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/files" --paginate)"
-
-          VERSIONS="$(python3 - "$files_json" <<'PY'
-          import json, re, sys
-
-          KUBECTL_PLUS = re.compile(
-              r'^\+.*https://dl\.k8s\.io/release/(v\d+\.\d+\.\d+)/bin/linux/amd64/kubectl'
-          )
-          DOCKERFILE_RE = re.compile(r'^Dockerfile_v\d+\.\d+\.x$')
-
-          files = json.loads(sys.argv[1])
-          versions = []
-          for f in files:
-              name = f.get('filename', '')
-              if not DOCKERFILE_RE.match(name):
-                  continue
-              patch = f.get('patch') or ''
-              for line in patch.splitlines():
-                  m = KUBECTL_PLUS.match(line)
-                  if m:
-                      versions.append(m.group(1))
-
-          for v in sorted(set(versions), key=lambda s: list(map(int, s[1:].split('.')))):
-              print(v)
-          PY
-          )"
-
-          if [ -z "${VERSIONS}" ]; then
-            echo "No kubectl version additions in Dockerfile_v*.x; skipping tag/release"
-            exit 0
-          fi
-
-          while IFS= read -r VERSION; do
-            [ -n "${VERSION}" ] || continue
-            .github/scripts/publish_kubectl_version.sh "${VERSION}"
-          done <<< "${VERSIONS}"
-
-          dockerfile="$(ls -1 Dockerfile_v*.x | sed 's/^Dockerfile_v//' | sort -t. -k1,1n -k2,2n | tail -1 | sed 's/^/Dockerfile_v/')"
-          .github/scripts/docker_publish.sh "${dockerfile}" "latest"
+          chmod +x .github/scripts/*.sh .github/scripts/*.py
+          .github/scripts/tag_and_publish_from_pr.sh

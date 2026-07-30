@@ -12,17 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
-      - name: Set env
-        run: |
-          RELEASE_VERSION="${GITHUB_REF_NAME}"
-          MINOR="$(echo "${RELEASE_VERSION}" | sed -E 's/^(v[0-9]+\.[0-9]+)\.[0-9]+$/\1/')"
-          DOCKERFILE="Dockerfile_${MINOR}.x"
-          if [ ! -f "${DOCKERFILE}" ]; then
-            echo "Missing ${DOCKERFILE} for tag ${RELEASE_VERSION}"
-            exit 1
-          fi
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
-          echo "DOCKERFILE=${DOCKERFILE}" >> "$GITHUB_ENV"
       - name: Publish version tag to registry
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -31,10 +20,13 @@ jobs:
           GITHUB_USER: ${{ github.repository_owner }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker version
-          docker build -f "${DOCKERFILE}" -t "docker.io/${IMAGE}:${RELEASE_VERSION}" .
-          docker tag "docker.io/${IMAGE}:${RELEASE_VERSION}" "ghcr.io/${IMAGE}:${RELEASE_VERSION}"
-          docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-          docker push "docker.io/${IMAGE}:${RELEASE_VERSION}"
-          docker login -u "${GITHUB_USER}" -p "${GITHUB_TOKEN}" ghcr.io
-          docker push "ghcr.io/${IMAGE}:${RELEASE_VERSION}"
+          set -euo pipefail
+          chmod +x .github/scripts/*.sh
+          RELEASE_VERSION="${GITHUB_REF_NAME}"
+          MINOR="$(echo "${RELEASE_VERSION}" | sed -E 's/^(v[0-9]+\.[0-9]+)\.[0-9]+$/\1/')"
+          DOCKERFILE="Dockerfile_${MINOR}.x"
+          if [ ! -f "${DOCKERFILE}" ]; then
+            echo "Missing ${DOCKERFILE} for tag ${RELEASE_VERSION}"
+            exit 1
+          fi
+          .github/scripts/docker_publish.sh "${DOCKERFILE}" "${RELEASE_VERSION}"

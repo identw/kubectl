@@ -12,15 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
-      - name: Resolve latest minor Dockerfile
-        run: |
-          DOCKERFILE="$(ls -1 Dockerfile_v*.x | sed 's/^Dockerfile_v//' | sort -t. -k1,1n -k2,2n | tail -1 | sed 's/^/Dockerfile_v/')"
-          if [ -z "${DOCKERFILE}" ] || [ ! -f "${DOCKERFILE}" ]; then
-            echo "No Dockerfile_v*.x found"
-            exit 1
-          fi
-          echo "Using ${DOCKERFILE} for latest"
-          echo "DOCKERFILE=${DOCKERFILE}" >> "$GITHUB_ENV"
       - name: Publish latest tag to registry
         env:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -29,10 +20,8 @@ jobs:
           GITHUB_USER: ${{ github.repository_owner }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker version
-          docker build -f "${DOCKERFILE}" -t "docker.io/${IMAGE}:latest" .
-          docker tag "docker.io/${IMAGE}:latest" "ghcr.io/${IMAGE}:latest"
-          docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-          docker push "docker.io/${IMAGE}:latest"
-          docker login -u "${GITHUB_USER}" -p "${GITHUB_TOKEN}" ghcr.io
-          docker push "ghcr.io/${IMAGE}:latest"
+          set -euo pipefail
+          chmod +x .github/scripts/*.sh
+          DOCKERFILE="$(.github/scripts/resolve_latest_dockerfile.sh)"
+          echo "Using ${DOCKERFILE} for latest"
+          .github/scripts/docker_publish.sh "${DOCKERFILE}" "latest"

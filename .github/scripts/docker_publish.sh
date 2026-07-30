@@ -1,5 +1,22 @@
 #!/usr/bin/env bash
-# Build and push image for a specific Dockerfile and tag name.
+#
+# Build and push a kubectl image to Docker Hub and GHCR.
+#
+# What it does:
+#   docker build -f <Dockerfile> and push docker.io/$IMAGE:<tag> + ghcr.io/$IMAGE:<tag>
+#
+# Input:
+#   Arg1 — Dockerfile path (e.g. Dockerfile_v1.36.x)
+#   Arg2 — image tag (e.g. v1.36.3 or latest)
+#   Env:
+#     IMAGE          — repository image name (e.g. identw/kubectl)
+#     DOCKER_USER, DOCKER_PASSWORD — Docker Hub
+#     GITHUB_USER, GITHUB_TOKEN    — GHCR login
+#
+# Output:
+#   Side effects — image published to both registries
+#   Exit non-zero on docker failure
+#
 set -euo pipefail
 
 DOCKERFILE="${1:?Dockerfile path required}"

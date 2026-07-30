@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
-"""Regenerate README.md image table from Dockerfile_v*.x files."""
+"""
+Regenerate the README.md kubectl image version table.
+
+What it does:
+  Reads all Dockerfile_v*.x, builds a markdown table with columns
+  (k8s minor branch, ghcr image, docker hub image), and updates the block
+  between VERSION_TABLE markers in README.md (or creates README.md from a template).
+
+Input:
+  None (uses repo root two levels above this script)
+  Optional: run from anywhere; paths are absolute via __file__
+
+Output:
+  Side effect — writes README.md if the table changed
+  Stdout — "Updated README.md" or "README.md already up to date"
+  Exit 0 on success, 1 if no Dockerfiles found
+"""
 from __future__ import annotations
 
 import re
@@ -53,12 +69,14 @@ def collect_versions() -> list[tuple[str, str]]:
 
 def render_table(versions: list[tuple[str, str]]) -> str:
     lines = [
-        "| Minor | Image |",
-        "| --- | --- |",
+        "| k8s minor branch | ghcr image | docker hub image |",
+        "| --- | --- | --- |",
     ]
     for minor_label, patch_tag in versions:
         lines.append(
-            f"| {minor_label} | `ghcr.io/identw/kubectl:{patch_tag}` |"
+            f"| {minor_label} "
+            f"| `ghcr.io/identw/kubectl:{patch_tag}` "
+            f"| `docker.io/identw/kubectl:{patch_tag}` |"
         )
     return "\n".join(lines)
 

@@ -39,7 +39,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          chmod +x .github/scripts/automerge_renovate_prs.sh
+          chmod +x .github/scripts/*.sh .github/scripts/*.py
           .github/scripts/automerge_renovate_prs.sh | tee /tmp/automerge.log
           grep '^MERGED ' /tmp/automerge.log > /tmp/merged.txt || true
           if [ -s /tmp/merged.txt ]; then
@@ -60,29 +60,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          chmod +x .github/scripts/*.sh .github/scripts/update_readme.py
+          chmod +x .github/scripts/*.sh .github/scripts/*.py
           git pull --ff-only origin main
-
-          publish_latest=false
-
-          while read -r _ pr rest; do
-            kubectl="$(echo "${rest}" | sed -n 's/.*kubectl=\([^ ]*\).*/\1/p')"
-            alpine="$(echo "${rest}" | sed -n 's/.*alpine=\([^ ]*\).*/\1/p')"
-
-            if [ "${alpine}" = "yes" ]; then
-              publish_latest=true
-            fi
-
-            if [ "${kubectl}" != "none" ] && [ -n "${kubectl}" ]; then
-              IFS=',' read -ra versions <<< "${kubectl}"
-              for version in "${versions[@]}"; do
-                .github/scripts/publish_kubectl_version.sh "${version}"
-              done
-              publish_latest=true
-            fi
-          done < /tmp/merged.txt
-
-          if [ "${publish_latest}" = "true" ]; then
-            dockerfile="$(ls -1 Dockerfile_v*.x | sed 's/^Dockerfile_v//' | sort -t. -k1,1n -k2,2n | tail -1 | sed 's/^/Dockerfile_v/')"
-            .github/scripts/docker_publish.sh "${dockerfile}" "latest"
-          fi
+          .github/scripts/publish_after_automerge.sh /tmp/merged.txt
