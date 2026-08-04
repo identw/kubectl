@@ -71,9 +71,10 @@ python3 "${SCRIPT_DIR}/update_readme.py"
 if [ -n "$(git status --porcelain README.md)" ]; then
   git config user.name "github-actions[bot]"
   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-  git pull --rebase origin main
+  # Commit before pull --rebase: rebase refuses a dirty worktree.
   git add README.md
   git commit -m "docs: update image table for ${VERSION}"
+  git pull --rebase origin main
   git push origin HEAD:main
   echo "Pushed README update"
 fi
