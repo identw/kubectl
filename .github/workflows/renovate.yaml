@@ -21,10 +21,16 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@main
 
+      # renovatebot/github-action mounts only the config file into the Renovate
+      # container (/github-action/...), so scanning Dockerfiles via __dirname
+      # yields empty packageRules. Materialize rules from the workspace first.
+      - name: Materialize Renovate bot config
+        run: node .github/renovate_config.js > .github/renovate_config.generated.js
+
       - name: Run Renovate
         uses: renovatebot/github-action@v43.0.3
         with:
-          configurationFile: .github/renovate_config.js
+          configurationFile: .github/renovate_config.generated.js
           token: ${{ secrets.GITHUB_TOKEN }}
         env:
           LOG_LEVEL: debug

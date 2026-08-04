@@ -1,2 +1,3 @@
 __pycache__/
 *.py[cod]
+.github/renovate_config.generated.js
