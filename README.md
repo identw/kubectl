@@ -14,9 +14,9 @@ Images are published to:
 <!-- VERSION_TABLE:START -->
 | k8s minor branch | ghcr image | docker hub image |
 | --- | --- | --- |
-| v1.36.x | `ghcr.io/identw/kubectl:v1.36.3` | `docker.io/identw/kubectl:v1.36.3` |
-| v1.35.x | `ghcr.io/identw/kubectl:v1.35.7` | `docker.io/identw/kubectl:v1.35.7` |
-| v1.34.x | `ghcr.io/identw/kubectl:v1.34.10` | `docker.io/identw/kubectl:v1.34.10` |
+| v1.36.x | `ghcr.io/identw/kubectl:v1.36.4` | `docker.io/identw/kubectl:v1.36.4` |
+| v1.35.x | `ghcr.io/identw/kubectl:v1.35.8` | `docker.io/identw/kubectl:v1.35.8` |
+| v1.34.x | `ghcr.io/identw/kubectl:v1.34.11` | `docker.io/identw/kubectl:v1.34.11` |
 | v1.33.x | `ghcr.io/identw/kubectl:v1.33.13` | `docker.io/identw/kubectl:v1.33.13` |
 | v1.32.x | `ghcr.io/identw/kubectl:v1.32.13` | `docker.io/identw/kubectl:v1.32.13` |
 | v1.31.x | `ghcr.io/identw/kubectl:v1.31.14` | `docker.io/identw/kubectl:v1.31.14` |
