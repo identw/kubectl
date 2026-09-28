@@ -14,10 +14,10 @@ Images are published to:
 <!-- VERSION_TABLE:START -->
 | k8s minor branch | ghcr image | docker hub image |
 | --- | --- | --- |
-| v1.37.x | `ghcr.io/identw/kubectl:v1.37.0` | `docker.io/identw/kubectl:v1.37.0` |
-| v1.36.x | `ghcr.io/identw/kubectl:v1.36.4` | `docker.io/identw/kubectl:v1.36.4` |
-| v1.35.x | `ghcr.io/identw/kubectl:v1.35.8` | `docker.io/identw/kubectl:v1.35.8` |
-| v1.34.x | `ghcr.io/identw/kubectl:v1.34.11` | `docker.io/identw/kubectl:v1.34.11` |
+| v1.37.x | `ghcr.io/identw/kubectl:v1.37.1` | `docker.io/identw/kubectl:v1.37.1` |
+| v1.36.x | `ghcr.io/identw/kubectl:v1.36.5` | `docker.io/identw/kubectl:v1.36.5` |
+| v1.35.x | `ghcr.io/identw/kubectl:v1.35.9` | `docker.io/identw/kubectl:v1.35.9` |
+| v1.34.x | `ghcr.io/identw/kubectl:v1.34.12` | `docker.io/identw/kubectl:v1.34.12` |
 | v1.33.x | `ghcr.io/identw/kubectl:v1.33.13` | `docker.io/identw/kubectl:v1.33.13` |
 | v1.32.x | `ghcr.io/identw/kubectl:v1.32.13` | `docker.io/identw/kubectl:v1.32.13` |
 | v1.31.x | `ghcr.io/identw/kubectl:v1.31.14` | `docker.io/identw/kubectl:v1.31.14` |
