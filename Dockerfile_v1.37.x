@@ -2,5 +2,5 @@ FROM docker.io/alpine:3.24.3
 LABEL org.opencontainers.image.source https://github.com/identw/kubectl
 
 RUN apk add --no-cache curl bash \
-    && curl -L https://dl.k8s.io/release/v1.37.1/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
+    && curl -L https://dl.k8s.io/release/v1.37.2/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
     && chmod +x /usr/local/bin/kubectl
